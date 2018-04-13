@@ -40,16 +40,20 @@ func main() {
 	// for cont := true; cont; cont = true {
 	// Draw top, start at 2 for the corners
 	buffer = drawGridTop(buffer, width)
-	buffer = drawCenter(buffer, width, height, c)
+	buffer, c = drawCenter(buffer, width, height, c)
 	buffer = drawGridBottom(buffer, width)
 
 	// fmt.Println(buffer.String())
 	for i := 0; i < 1000; i++ {
+		time.Sleep(time.Second / time.Duration(1))
+
 		clear := exec.Command("clear")
 		clear.Stdout = os.Stdout
 		clear.Run()
 
-		time.Sleep(time.Second / time.Duration(120))
+		buffer = drawGridTop(buffer, width)
+		buffer, c = drawCenter(buffer, width, height, c)
+		buffer = drawGridBottom(buffer, width)
 
 		fmt.Println(buffer.String())
 	}
@@ -81,7 +85,7 @@ func drawGridTop(b bytes.Buffer, width int) bytes.Buffer {
 	return b
 }
 
-func drawCenter(b bytes.Buffer, width int, height int, generation map[int]map[int]bool) bytes.Buffer {
+func drawCenter(b bytes.Buffer, width int, height int, generation map[int]map[int]bool) (bytes.Buffer, map[int]map[int]bool) {
 	// Draw in between
 	var death = color.HiBlackString("0")
 	var life = color.HiGreenString("1")
@@ -120,7 +124,7 @@ func drawCenter(b bytes.Buffer, width int, height int, generation map[int]map[in
 		b.WriteString("\n")
 	}
 
-	return b
+	return b, generation
 }
 
 func drawGridBottom(b bytes.Buffer, width int) bytes.Buffer {
