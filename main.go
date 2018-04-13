@@ -8,11 +8,15 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 // ┌http://www.theasciicode.com.ar/extended-ascii-code/box-drawing-character-single-line-upper-left-corner-ascii-code-218.html
 func main() {
 	height, width := grid()
+
+	height = height - 3 // minus top, minus bottom, minus enter
 
 	fmt.Println(width)
 	fmt.Println(height)
@@ -64,12 +68,15 @@ func drawGridTop(b bytes.Buffer, width uint) bytes.Buffer {
 func drawCenter(b bytes.Buffer, width uint, height uint) bytes.Buffer {
 	// Draw in between
 	// var death = "▒"
-	var death = " "
-	var life = "▓"
+	// go get github.com/fatih/color
+	var death = color.HiBlackString("▓")
+	var life = color.HiGreenString("▓") //"▓"
+
 	for i := uint(0); i < height; i++ {
 		b.WriteString("│")
+
 		for j := uint(2); j < width; j++ {
-			if (j % 2) == 0 {
+			if (j % 12) == 0 {
 				b.WriteString(life)
 			} else {
 				b.WriteString(death)
