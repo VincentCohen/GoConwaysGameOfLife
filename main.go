@@ -43,20 +43,32 @@ func main() {
 	buffer, c = drawCenter(buffer, width, height, c)
 	buffer = drawGridBottom(buffer, width)
 
-	// fmt.Println(buffer.String())
-	for i := 0; i < 1000; i++ {
-		time.Sleep(time.Second / time.Duration(1))
+	NextGeneration := true
+	for loop := true; loop; loop = NextGeneration {
 
 		clear := exec.Command("clear")
 		clear.Stdout = os.Stdout
 		clear.Run()
 
-		buffer = drawGridTop(buffer, width)
-		buffer, c = drawCenter(buffer, width, height, c)
-		buffer = drawGridBottom(buffer, width)
-
 		fmt.Println(buffer.String())
+
+		time.Sleep(time.Second / time.Duration(5))
 	}
+
+	// // fmt.Println(buffer.String())
+	// for i := 0; i < 1000; i++ {
+	// 	time.Sleep(time.Second / time.Duration(1))
+
+	// 	clear := exec.Command("clear")
+	// 	clear.Stdout = os.Stdout
+	// 	clear.Run()
+
+	// 	buffer = drawGridTop(buffer, width)
+	// 	buffer, c = drawCenter(buffer, width, height, c)
+	// 	buffer = drawGridBottom(buffer, width)
+
+	// 	fmt.Println(buffer.String())
+	// }
 }
 
 func grid() (int, int) {
