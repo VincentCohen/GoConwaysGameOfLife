@@ -30,9 +30,7 @@ func main() {
 	NextGeneration := true
 	for loop := true; loop; loop = NextGeneration {
 
-		clear := exec.Command("clear")
-		clear.Stdout = os.Stdout
-		clear.Run()
+		clear()
 
 		fmt.Println(buffer.String())
 
@@ -159,4 +157,13 @@ func populate(generation map[int]map[int]bool, x int, y int) bool {
 	// Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
 	// Dead cell with == 3 live neighbours = LIVE
 
+}
+
+/*
+Clear output
+*/
+func clear() {
+	clear := exec.Command("clear")
+	clear.Stdout = os.Stdout
+	clear.Run()
 }
