@@ -23,7 +23,7 @@ func main() {
 
 	// Contains the output
 	buffer = top(buffer, width)
-	buffer, generation = nextGeneration(buffer, width, height, generation)
+	buffer, generation = drawGeneration(buffer, width, height, generation)
 	buffer = bottom(buffer, width)
 
 	// Should loop trough the generations
@@ -73,7 +73,7 @@ func top(b bytes.Buffer, width int) bytes.Buffer {
 /**
 Draws the next generation
 */
-func nextGeneration(b bytes.Buffer, width int, height int, generation map[int]map[int]bool) (bytes.Buffer, map[int]map[int]bool) {
+func drawGeneration(b bytes.Buffer, width int, height int, generation map[int]map[int]bool) (bytes.Buffer, map[int]map[int]bool) {
 	// Draw in between
 	var death = color.HiBlackString("0")
 	var life = color.HiGreenString("1")
@@ -83,7 +83,7 @@ func nextGeneration(b bytes.Buffer, width int, height int, generation map[int]ma
 
 		for y := int(0); y < width; y++ {
 			// Retrieve the cell state
-			if populate(generation, x, y) {
+			if generation[x][y] {
 				b.WriteString(life)
 			} else {
 				b.WriteString(death)
@@ -133,14 +133,15 @@ func getFirstGeneration() map[int]map[int]bool {
 }
 
 /**
-Determines wether the cells are alive or death based on the current generation
+Calculates based on the current generation & draws it out using the drawGeneration function
 */
-func populate(generation map[int]map[int]bool, x int, y int) bool {
+func nextGeneration(currentGeneration map[int]map[int]bool, x int, y int) bool {
 
-	// Generate the playing field for the first go
-	if generation[x][y] {
+	if currentGeneration[x][y] {
 		return true
 	}
+
+	// drawGeneration
 	return false
 	// Decide the normal live / death states as they are advancing generation
 	// Track states
