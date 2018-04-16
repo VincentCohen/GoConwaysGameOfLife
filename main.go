@@ -8,7 +8,6 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/fatih/color"
 )
@@ -22,20 +21,27 @@ func main() {
 	generation := getFirstGeneration()
 
 	// Contains the output
-	buffer = top(buffer, width)
 	buffer, generation = drawGeneration(buffer, width, height, generation)
-	buffer = bottom(buffer, width)
 
-	// Should loop trough the generations
-	NextGeneration := true
-	for loop := true; loop; loop = NextGeneration {
+	fmt.Println(buffer.String())
+	buffer.Reset()
+	fmt.Println("-----")
 
-		clear()
+	foo := nextGeneration(generation)
 
-		fmt.Println(buffer.String())
+	buffer, _ = drawGeneration(buffer, width, height, foo)
 
-		time.Sleep(time.Second / time.Duration(5))
-	}
+	fmt.Println(buffer.String())
+	// // Should loop trough the generations
+	// NextGeneration := true
+	// for loop := true; loop; loop = NextGeneration {
+
+	// 	clear()
+
+	// 	fmt.Println(buffer.String())
+
+	// 	time.Sleep(time.Second / time.Duration(5))
+	// }
 }
 
 /**
@@ -54,20 +60,7 @@ func dimensions() (int, int) {
 
 	y, err := strconv.Atoi(strings.Replace(parts[1], "\n", "", 1))
 
-	return int(x - 2), int(y - 3) // Minus the sides, Minus the top
-}
-
-/**
-Draws the top of the game
-*/
-func top(b bytes.Buffer, width int) bytes.Buffer {
-	b.WriteString("┌")
-	for i := int(0); i < width; i++ {
-		b.WriteString("─")
-	}
-	b.WriteString("┐\n")
-
-	return b
+	return int(x), int(y) // Minus the sides, Minus the top
 }
 
 /**
@@ -79,8 +72,6 @@ func drawGeneration(b bytes.Buffer, width int, height int, generation map[int]ma
 	var life = color.HiGreenString("1")
 
 	for x := int(0); x < height; x++ {
-		b.WriteString("│")
-
 		for y := int(0); y < width; y++ {
 			// Retrieve the cell state
 			if generation[x][y] {
@@ -89,7 +80,6 @@ func drawGeneration(b bytes.Buffer, width int, height int, generation map[int]ma
 				b.WriteString(death)
 			}
 		}
-		b.WriteString("│")
 		b.WriteString("\n")
 	}
 
@@ -97,37 +87,39 @@ func drawGeneration(b bytes.Buffer, width int, height int, generation map[int]ma
 }
 
 /**
-Draws the bottom of the game
-*/
-func bottom(b bytes.Buffer, width int) bytes.Buffer {
-	b.WriteString("└")
-	for i := int(0); i < width; i++ {
-		b.WriteString("─")
-	}
-	b.WriteString("┘")
-
-	return b
-}
-
-/**
 First generation
 */
 func getFirstGeneration() map[int]map[int]bool {
 	c := map[int]map[int]bool{}
-	c[0] = map[int]bool{}
-
-	c[0][0] = true
-	c[0][1] = true
-	c[0][2] = true
-	c[0][3] = true
-	c[0][4] = true
 
 	c[1] = map[int]bool{}
+	c[2] = map[int]bool{}
+	c[3] = map[int]bool{}
+	c[4] = map[int]bool{}
+	c[5] = map[int]bool{}
+
+	c[1][3] = true
 	c[1][4] = true
 	c[1][5] = true
 	c[1][6] = true
-	c[1][7] = true
-	c[1][8] = true
+
+	c[2][6] = true
+	c[2][7] = true
+
+	c[3][6] = true
+	c[4][5] = true
+
+	c[1][13] = true
+	c[1][14] = true
+	c[1][15] = true
+	c[1][16] = true
+
+	c[2][12] = true
+	c[2][16] = true
+
+	c[3][16] = true
+	c[4][16] = true
+	c[4][13] = true
 
 	return c
 }
@@ -135,29 +127,69 @@ func getFirstGeneration() map[int]map[int]bool {
 /**
 Calculates based on the current generation & draws it out using the drawGeneration function
 */
-func nextGeneration(currentGeneration map[int]map[int]bool, x int, y int) bool {
+func nextGeneration(currentGeneration map[int]map[int]bool) map[int]map[int]bool {
 
-	if currentGeneration[x][y] {
-		return true
+	nextGeneration := map[int]map[int]bool{}
+
+	for x := range currentGeneration {
+		nextGeneration[x] = map[int]bool{}
+
+		for y, value := range currentGeneration[x] {
+			nextGeneration[x][y] = value
+			// fmt.Println(x)
+			// fmt.Println(y)
+			// fmt.Println(value)
+			// neightbour fmt.Println(currentGeneration[x-1][y-1])
+
+			neighbours := getNeighbours(currentGeneration, x, y)
+			// Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
+			if value == true && neighbours < 2 {
+				nextGeneration[x][y] = false
+			}
+
+			// Any live cell with two or three live neighbours lives on to the next generation.
+			if value == true && (neighbours == 2 || neighbours == 3) {
+				nextGeneration[x][y] = true
+			}
+
+			// Any live cell with more than three live neighbours dies, as if by overpopulation.
+			if value == true && neighbours > 3 {
+				nextGeneration[x][y] = false
+			}
+
+			// Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+			// Dead cell with == 3 live neighbours = LIVE
+			if value == false && neighbours == 3 {
+				nextGeneration[x][y] = true
+			}
+
+		}
 	}
 
-	// drawGeneration
-	return false
-	// Decide the normal live / death states as they are advancing generation
-	// Track states
+	return nextGeneration
+}
 
-	// Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
-	// Live cell < 2 live = dead
+func getNeighbours(generation map[int]map[int]bool, x int, y int) int {
+	// Check neighbours
+	neighbours := 0
 
-	// Any live cell with two or three live neighbours lives on to the next generation.
-	// Live cell with  >2 OR 3  live neighbours = next generation
+	if generation[x-1][y] {
+		neighbours++
+	}
 
-	// Any live cell with more than three live neighbours dies, as if by overpopulation.
-	// Live cell with >3 live neighbours = dead
+	if generation[x+1][y] {
+		neighbours++
+	}
 
-	// Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
-	// Dead cell with == 3 live neighbours = LIVE
+	if generation[x][y-1] {
+		neighbours++
+	}
 
+	if generation[x][y+1] {
+		neighbours++
+	}
+
+	return neighbours
 }
 
 /*
