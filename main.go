@@ -13,7 +13,6 @@ import (
 	"github.com/fatih/color"
 )
 
-//http://www.theasciicode.com.ar/extended-ascii-code/box-drawing-character-single-line-upper-left-corner-ascii-code-218.html
 func main() {
 	height, width := dimensions()
 
@@ -24,7 +23,7 @@ func main() {
 	// Contains the output
 	buffer, generation = drawGeneration(buffer, width, height, generation)
 
-	nextGeneration(generation)
+	generation = nextGeneration(generation)
 
 	fmt.Println(buffer.String())
 	buffer.Reset()
@@ -32,7 +31,7 @@ func main() {
 	// Loop trough the generations for ever!
 	for loop := true; loop; loop = true {
 
-		generation := nextGeneration(generation)
+		generation = nextGeneration(generation)
 
 		buffer, _ = drawGeneration(buffer, width, height, generation)
 
@@ -99,29 +98,29 @@ func getFirstGeneration(width int, height int) map[int]map[int]bool {
 		}
 	}
 
-	// g[1][3] = true
-	// g[1][4] = true
-	// g[1][5] = true
-	// g[1][6] = true
-	// g[1][13] = true
-	// g[1][14] = true
-	// g[1][15] = true
-	// g[1][16] = true
-	g[3][6] = true
-	g[3][7] = true
-	g[3][8] = true
-
-	// g[2][6] = true
-	// g[2][7] = true
-
+	g[1][3] = true
+	g[1][4] = true
+	g[1][5] = true
+	g[1][6] = true
+	g[1][13] = true
+	g[1][14] = true
+	g[1][15] = true
+	g[1][16] = true
 	// g[3][6] = true
-	// g[4][5] = true
-	// g[2][12] = true
-	// g[2][16] = true
+	// g[3][7] = true
+	// g[3][8] = true
 
-	// g[3][16] = true
-	// g[4][16] = true
-	// g[4][13] = true
+	g[2][6] = true
+	g[2][7] = true
+
+	g[3][6] = true
+	g[4][5] = true
+	g[2][12] = true
+	g[2][16] = true
+
+	g[3][16] = true
+	g[4][16] = true
+	g[4][13] = true
 
 	return g
 }
