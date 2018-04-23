@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/fatih/color"
 )
@@ -18,30 +19,30 @@ func main() {
 
 	var buffer bytes.Buffer
 
-	generation := getFirstGeneration()
+	generation := getFirstGeneration(width, height)
 
 	// Contains the output
 	buffer, generation = drawGeneration(buffer, width, height, generation)
 
+	nextGeneration(generation)
+
 	fmt.Println(buffer.String())
 	buffer.Reset()
-	fmt.Println("-----")
 
-	foo := nextGeneration(generation)
+	// Loop trough the generations for ever!
+	for loop := true; loop; loop = true {
 
-	buffer, _ = drawGeneration(buffer, width, height, foo)
+		generation := nextGeneration(generation)
 
-	fmt.Println(buffer.String())
-	// // Should loop trough the generations
-	// NextGeneration := true
-	// for loop := true; loop; loop = NextGeneration {
+		buffer, _ = drawGeneration(buffer, width, height, generation)
 
-	// 	clear()
+		clear()
 
-	// 	fmt.Println(buffer.String())
+		fmt.Println(buffer.String())
+		time.Sleep(time.Second / time.Duration(5))
 
-	// 	time.Sleep(time.Second / time.Duration(5))
-	// }
+		buffer.Reset()
+	}
 }
 
 /**
@@ -89,39 +90,40 @@ func drawGeneration(b bytes.Buffer, width int, height int, generation map[int]ma
 /**
 First generation
 */
-func getFirstGeneration() map[int]map[int]bool {
-	c := map[int]map[int]bool{}
+func getFirstGeneration(width int, height int) map[int]map[int]bool {
+	g := map[int]map[int]bool{}
+	for x := int(0); x < height; x++ {
+		g[x] = map[int]bool{}
+		for y := int(0); y < width; y++ {
+			g[x][y] = false
+		}
+	}
 
-	c[1] = map[int]bool{}
-	c[2] = map[int]bool{}
-	c[3] = map[int]bool{}
-	c[4] = map[int]bool{}
-	c[5] = map[int]bool{}
+	// g[1][3] = true
+	// g[1][4] = true
+	// g[1][5] = true
+	// g[1][6] = true
+	// g[1][13] = true
+	// g[1][14] = true
+	// g[1][15] = true
+	// g[1][16] = true
+	g[3][6] = true
+	g[3][7] = true
+	g[3][8] = true
 
-	c[1][3] = true
-	c[1][4] = true
-	c[1][5] = true
-	c[1][6] = true
+	// g[2][6] = true
+	// g[2][7] = true
 
-	c[2][6] = true
-	c[2][7] = true
+	// g[3][6] = true
+	// g[4][5] = true
+	// g[2][12] = true
+	// g[2][16] = true
 
-	c[3][6] = true
-	c[4][5] = true
+	// g[3][16] = true
+	// g[4][16] = true
+	// g[4][13] = true
 
-	c[1][13] = true
-	c[1][14] = true
-	c[1][15] = true
-	c[1][16] = true
-
-	c[2][12] = true
-	c[2][16] = true
-
-	c[3][16] = true
-	c[4][16] = true
-	c[4][13] = true
-
-	return c
+	return g
 }
 
 /**
@@ -134,35 +136,26 @@ func nextGeneration(currentGeneration map[int]map[int]bool) map[int]map[int]bool
 	for x := range currentGeneration {
 		nextGeneration[x] = map[int]bool{}
 
-		for y, value := range currentGeneration[x] {
-			nextGeneration[x][y] = value
-			// fmt.Println(x)
-			// fmt.Println(y)
-			// fmt.Println(value)
-			// neightbour fmt.Println(currentGeneration[x-1][y-1])
-
+		for y, isAlive := range currentGeneration[x] {
+			nextGeneration[x][y] = isAlive
 			neighbours := getNeighbours(currentGeneration, x, y)
+
 			// Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
-			if value == true && neighbours < 2 {
-				nextGeneration[x][y] = false
-			}
-
 			// Any live cell with two or three live neighbours lives on to the next generation.
-			if value == true && (neighbours == 2 || neighbours == 3) {
-				nextGeneration[x][y] = true
-			}
-
 			// Any live cell with more than three live neighbours dies, as if by overpopulation.
-			if value == true && neighbours > 3 {
-				nextGeneration[x][y] = false
-			}
-
 			// Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
-			// Dead cell with == 3 live neighbours = LIVE
-			if value == false && neighbours == 3 {
-				nextGeneration[x][y] = true
+			willLive := false
+			if isAlive {
+				if neighbours == 2 || neighbours == 3 {
+					willLive = true
+				}
+			} else {
+				if neighbours == 3 {
+					willLive = true
+				}
 			}
 
+			nextGeneration[x][y] = willLive
 		}
 	}
 
@@ -170,10 +163,26 @@ func nextGeneration(currentGeneration map[int]map[int]bool) map[int]map[int]bool
 }
 
 func getNeighbours(generation map[int]map[int]bool, x int, y int) int {
-	// Check neighbours
+
 	neighbours := 0
 
+	if generation[x][y-1] {
+		neighbours++
+	}
+
+	if generation[x][y+1] {
+		neighbours++
+	}
+
 	if generation[x-1][y] {
+		neighbours++
+	}
+
+	if generation[x-1][y-1] {
+		neighbours++
+	}
+
+	if generation[x-1][y+1] {
 		neighbours++
 	}
 
@@ -181,11 +190,11 @@ func getNeighbours(generation map[int]map[int]bool, x int, y int) int {
 		neighbours++
 	}
 
-	if generation[x][y-1] {
+	if generation[x+1][y-1] {
 		neighbours++
 	}
 
-	if generation[x][y+1] {
+	if generation[x+1][y+1] {
 		neighbours++
 	}
 
